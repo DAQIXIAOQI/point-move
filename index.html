@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<head>
+    <style>
+        div,
+        button,
+        body {
+            margin: 0px;
+            padding: 0px;
+        }
+        
+        div#target {
+            width: 20px;
+            height: 20px;
+            position: absolute;
+            left: 50px;
+            top: 50px;
+            background-color: red;
+            border-radius: 100%;
+        }
+
+    </style>
+    <script src="mylibrary.js" type="text/javascript"></script>
+    <script>
+        window.onload = function() {
+            var btn1 = document.getElementsByTagName("button")[0];
+            var btn2 = document.getElementsByTagName("button")[1];
+            var div = document.getElementById("target");
+            var p = document.getElementsByTagName("p")[0];
+            var arr = new Array();
+
+            btn1.onclick = function(event) {
+                p.innerHTML = "目前为点击位置移动模式";
+                var event = event || window.event;
+                clearEvent();
+                event.cancelBubble = true;
+
+                document.onclick = function(event) {
+                    var event = event || window.event;
+                    arr.length = 0;
+                    div.style.backgroundColor = "green";
+
+                    move(div, {
+                        left: event.clientX,
+                        top: event.clientY
+                    }, function() {
+                        div.style.backgroundColor = "red";
+                    });
+
+                }
+            }
+            btn2.onclick = function(event) {
+                p.innerHTML = "此时为按照鼠标轨迹移动模式";
+                var event = event || window.event;
+                clearEvent();
+                event.cancelBubble = true;
+
+                document.onmousedown = function(event) {
+                    var event = event || window.event;
+                    arr.push({
+                        x: event.clientX,
+                        y: event.clientY
+                    });
+                    document.onmousemove = function(event) {
+                        var event = event || window.event;
+
+                        arr.push({
+                            x: event.clientX,
+                            y: event.clientY
+                        });
+
+
+                    }
+
+                    document.onmouseup = function() {
+                        document.onmousemove = null;
+                        div.style.backgroundColor = "green";
+                        var c;
+                        clearInterval(timer);
+                        var timer = setInterval(function() {
+                            c = arr.shift();
+                            if (c) {
+                                div.style.left = c.x + "px";
+                                div.style.top = c.y + "px";
+                            } else {
+                                clearInterval(timer);
+                                div.style.backgroundColor = "red";
+                            }
+                        }, 30);
+
+                    }
+
+                    return false;
+                }
+
+            }
+            function clearEvent() {
+                document.onmousedown = null;
+                document.onmousemove = null;
+                document.onmouseup = null;
+                document.onclick = null;
+                btn1.onmousedown = btn1.onmouseup = function(event){
+                    (event||window.event).cancelBubble =true ;
+                }
+            }
+
+        }
+
+    </script>
+
+</head>
+
+<body>
+    <button>直线移动模式</button>
+    <button>根据轨迹移动模式</button>
+    <p>请点击按钮激活运动模式</p>
+    <div id="target"></div>
+</body>
+
+</html>
